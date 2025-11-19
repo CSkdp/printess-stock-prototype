@@ -1,52 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Printess + Stock Image Picker Prototype</title>
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        font-family: sans-serif;
+    }
+
+    #printess-editor {
+        width: 100vw;
+        height: 100vh;
+    }
+</style>
+
+</head>
+<body>
+
+<!-- Printess embeds into this container -->
+<div id="printess-editor"></div>
+
 <script type="module">
+/* -------------------------------------------
+   LOAD PRINTESS EDITOR
+---------------------------------------------- */
 const printessLoader = await import("https://editor.printess.com/printess-editor/loader.js");
 
 const printess = await printessLoader.load({
-  token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InByaW50ZXNzLXNhYXMtYWxwaGEiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiI5ZmMwZWIxYTc0NTg0NWRmYmZmOTI0NjE2MWI0Y2U0MSIsImp0aSI6Im1GQXZVN3NoNGhvZ0Nvb0ZkSDhkbGl6UkQtRWNrek01Iiwicm9sZSI6InNob3AiLCJuYmYiOjE3NjA3MDY3MDEsImV4cCI6MjA3NjA2NjcwMSwiaWF0IjoxNzYwNzA2NzAxLCJpc3MiOiJQcmludGVzcyBHbWJIICYgQ28uS0ciLCJhdWQiOiJwcmludGVzcy1zYWFzIn0.GJmwBCQHr8Srp1BMGKgEOsML1irL6d7C0YF_lA5d67v1W09rsxB9npft8lmQ7ppV_B6PzNpGV4Xph1ixH_rPotUOlmE8GpNPdM-teuYDQbegPH7ejAjp0GhpijuwWy9iAUKyAZZg3E-v52LcbsYAq_rwrDs9vlB4H9Se6n6bEnLxek662IN8Hg9wWQKRXFMq-Lu_pdMTtAf4pE6Z4AmniEIKvbxG7Jjq86CacdImk17GJm2UUSx3Aoo8xl-UhFWozUsNKgNA-_yJQ2QltqW4lFA4CplJjSV-ldRZv4gPm9Gx7Rd6SxbZEKoAGjjb5K-L1k6bOTwQF6X_KhqStQhakYLuM8MS4jKLAfFQKEAnUm28sIxJohJm0KqoGgvrchw2eK4JTadIJQp-PEBD5ux3lfBrIDBW8zWsaxg0oJkjhgXjWufT2JSHDUXEFVZMl9cherYYmHfvYpgad3pdaUlGMEcLVtL75znxDzYCNAZGkggHksmw7uy7yzdb3xV2rvWnBnkJq48yD6NipYVW5VyC_AZOPYLg2ybZh-ee3lBevMqIu6HIP1IbfnffeAayKaWRSNd-5283hMmg4UL5N-KgVRe_p5kwS0Jnbu87PUaDAwwuSMsB5yyJ6rZfxJ1l-BHh0D-KOXQYjy9thPgqNUisOctUc0sZydORAZfXDI4aGsY",
-  templateName: "Blank Circle",
-  templateVersion: "draft",
-  basketId: "Some-Unique-Basket-Or-Session-Id",
 
-  addToBasketCallback: (saveToken, thumbnailUrl) => {
-    prompt("Savetoken:", saveToken);
-  },
+    /* 
+    🔥 REPLACE THIS TOKEN with your real Printess token 
+    --------------------------------------------------- */
+    token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InByaW50ZXNzLXNhYXMtYWxwaGEiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiI5ZmMwZWIxYTc0NTg0NWRmYmZmOTI0NjE2MWI0Y2U0MSIsImp0aSI6Im1GQXZVN3NoNGhvZ0Nvb0ZkSDhkbGl6UkQtRWNrek01Iiwicm9sZSI6InNob3AiLCJuYmYiOjE3NjA3MDY3MDEsImV4cCI6MjA3NjA2NjcwMSwiaWF0IjoxNzYwNzA2NzAxLCJpc3MiOiJQcmludGVzcyBHbWJIICYgQ28uS0ciLCJhdWQiOiJwcmludGVzcy1zYWFzIn0.GJmwBCQHr8Srp1BMGKgEOsML1irL6d7C0YF_lA5d67v1W09rsxB9npft8lmQ7ppV_B6PzNpGV4Xph1ixH_rPotUOlmE8GpNPdM-teuYDQbegPH7ejAjp0GhpijuwWy9iAUKyAZZg3E-v52LcbsYAq_rwrDs9vlB4H9Se6n6bEnLxek662IN8Hg9wWQKRXFMq-Lu_pdMTtAf4pE6Z4AmniEIKvbxG7Jjq86CacdImk17GJm2UUSx3Aoo8xl-UhFWozUsNKgNA-_yJQ2QltqW4lFA4CplJjSV-ldRZv4gPm9Gx7Rd6SxbZEKoAGjjb5K-L1k6bOTwQF6X_KhqStQhakYLuM8MS4jKLAfFQKEAnUm28sIxJohJm0KqoGgvrchw2eK4JTadIJQp-PEBD5ux3lfBrIDBW8zWsaxg0oJkjhgXjWufT2JSHDUXEFVZMl9cherYYmHfvYpgad3pdaUlGMEcLVtL75znxDzYCNAZGkggHksmw7uy7yzdb3xV2rvWnBnkJq48yD6NipYVW5VyC_AZOPYLg2ybZh-ee3lBevMqIu6HIP1IbfnffeAayKaWRSNd-5283hMmg4UL5N-KgVRe_p5kwS0Jnbu87PUaDAwwuSMsB5yyJ6rZfxJ1l-BHh0D-KOXQYjy9thPgqNUisOctUc0sZydORAZfXDI4aGsY",
 
-  buttons: [
-    {
-      label: "Stock Images",
-      location: "image-upload",
-      clickCallback: async () => {
 
-        // Open Printess dialog containing the iframe picker
-        printess.ui.openIframeDialog({
-          title: "Stock Images",
-          url: "https://yourdomain.com/stock-picker.html",  // <-- Insert your path
-          width: 700,
-          height: 600,
-          allow: "fullscreen"
-        });
+    /* 
+    🔥 REPLACE TEMPLATE NAME + VERSION IF DIFFERENT 
+    --------------------------------------------------- */
+    templateName: "Blank Circle",
+    templateVersion: "draft",
 
-        // Listen for image selection events from the iframe
-        window.addEventListener("message", async (event) => {
-          if (!event.data || event.data.type !== "stock-image-selected") return;
 
-          const imageUrl = event.data.url;
+    host: document.getElementById("printess-editor"),
 
-          printess.ui.showProgressOverlay("Importing image...");
+    basketId: "demo-basket-123",
 
-          await printess.api.importImageFromUrl(imageUrl, true);
-          printess.api.clearSelection();
-          
-          printess.ui.hideProgressOverlay();
-          printess.ui.closeDialog();
 
-        }, { once: true });
-      },
+    buttons: [
+        {
+            label: "Stock Images",
+            location: "image-upload",
 
-      icon: "",
-      color: "primary",
-      outline: "outline"
-    }
-  ]
+            clickCallback: () => {
+
+                /* 
+                🔥 REPLACE THIS URL with your GitHub stock-picker.html URL
+                ----------------------------------------------------------- */
+                printess.ui.openIframeDialog({
+                    title: "Stock Images",
+                    url: "https://github.com/CSkdp/printess-stock-prototype/blob/main/stock-picker.html",
+                    width: 700,
+                    height: 600,
+                    allow: "fullscreen"
+                });
+
+                // Listen for message from stock picker
+                window.addEventListener("message", async (event) => {
+                    if (!event.data || event.data.type !== "stock-image-selected") return;
+
+                    const imageUrl = event.data.url;
+
+                    printess.ui.showProgressOverlay("Importing Image...");
+
+                    await printess.api.importImageFromUrl(imageUrl, true);
+
+                    printess.api.clearSelection();
+                    printess.ui.hideProgressOverlay();
+                    printess.ui.closeDialog();
+
+                }, { once: true });
+            },
+
+            icon: "",
+            color: "primary",
+            outline: "outline"
+        }
+    ]
 });
 </script>
+
+</body>
+</html>
