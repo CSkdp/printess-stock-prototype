@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Printess + Stock Picker (Popup Version)</title>
+<title>Printess + Stock Picker Prototype</title>
 
 <style>
     html, body {
@@ -11,6 +11,7 @@
         height: 100%;
         width: 100%;
         overflow: hidden;
+        font-family: sans-serif;
     }
 
     #printess-editor {
@@ -25,16 +26,17 @@
 <div id="printess-editor"></div>
 
 <script type="module">
-/* Load Printess */
+
+// Load Printess
 const printessLoader = await import("https://editor.printess.com/printess-editor/loader.js");
 
 const printess = await printessLoader.load({
-
-    /* 🔥 Replace with your token */
+    /* 🔥 Replace this with your real Printess token */
     token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InByaW50ZXNzLXNhYXMtYWxwaGEiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiI5ZmMwZWIxYTc0NTg0NWRmYmZmOTI0NjE2MWI0Y2U0MSIsImp0aSI6Im1GQXZVN3NoNGhvZ0Nvb0ZkSDhkbGl6UkQtRWNrek01Iiwicm9sZSI6InNob3AiLCJuYmYiOjE3NjA3MDY3MDEsImV4cCI6MjA3NjA2NjcwMSwiaWF0IjoxNzYwNzA2NzAxLCJpc3MiOiJQcmludGVzcyBHbWJIICYgQ28uS0ciLCJhdWQiOiJwcmludGVzcy1zYWFzIn0.GJmwBCQHr8Srp1BMGKgEOsML1irL6d7C0YF_lA5d67v1W09rsxB9npft8lmQ7ppV_B6PzNpGV4Xph1ixH_rPotUOlmE8GpNPdM-teuYDQbegPH7ejAjp0GhpijuwWy9iAUKyAZZg3E-v52LcbsYAq_rwrDs9vlB4H9Se6n6bEnLxek662IN8Hg9wWQKRXFMq-Lu_pdMTtAf4pE6Z4AmniEIKvbxG7Jjq86CacdImk17GJm2UUSx3Aoo8xl-UhFWozUsNKgNA-_yJQ2QltqW4lFA4CplJjSV-ldRZv4gPm9Gx7Rd6SxbZEKoAGjjb5K-L1k6bOTwQF6X_KhqStQhakYLuM8MS4jKLAfFQKEAnUm28sIxJohJm0KqoGgvrchw2eK4JTadIJQp-PEBD5ux3lfBrIDBW8zWsaxg0oJkjhgXjWufT2JSHDUXEFVZMl9cherYYmHfvYpgad3pdaUlGMEcLVtL75znxDzYCNAZGkggHksmw7uy7yzdb3xV2rvWnBnkJq48yD6NipYVW5VyC_AZOPYLg2ybZh-ee3lBevMqIu6HIP1IbfnffeAayKaWRSNd-5283hMmg4UL5N-KgVRe_p5kwS0Jnbu87PUaDAwwuSMsB5yyJ6rZfxJ1l-BHh0D-KOXQYjy9thPgqNUisOctUc0sZydORAZfXDI4aGsY",
 
     templateName: "Blank Circle",
     templateVersion: "draft",
+
     host: document.getElementById("printess-editor"),
     basketId: "demo-basket-123",
 
@@ -42,16 +44,17 @@ const printess = await printessLoader.load({
         {
             label: "Stock Images",
             location: "image-upload",
+
             clickCallback: () => {
 
-                // Open a popup window with your GitHub-hosted picker page
+                // OPEN THE POPUP WINDOW
                 const pickerWindow = window.open(
                     "https://cskdp.github.io/printess-stock-prototype/stock-picker.html",
                     "stockpicker",
-                    "width=900,height=700"
+                    "width=900,height=700,toolbar=no,location=no,menubar=no,status=no,resizable=yes,scrollbars=yes"
                 );
 
-                // Listen for a message from the child window
+                // LISTEN FOR IMAGE SELECTION
                 const listener = async (event) => {
                     if (!event.data) return;
 
@@ -59,16 +62,16 @@ const printess = await printessLoader.load({
 
                         printess.ui.showProgressOverlay("Importing Image...");
 
-                        // Import stock image into Printess
+                        // Import selected image
                         await printess.api.importImageFromUrl(event.data.url, true);
 
                         printess.api.clearSelection();
                         printess.ui.hideProgressOverlay();
 
-                        // Close picker window
+                        // Close the popup
                         pickerWindow.close();
 
-                        // Remove listener so it doesn't fire multiple times
+                        // Remove listener
                         window.removeEventListener("message", listener);
                     }
                 };
@@ -78,8 +81,8 @@ const printess = await printessLoader.load({
         }
     ]
 });
+
 </script>
 
 </body>
 </html>
-
