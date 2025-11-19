@@ -10,9 +10,9 @@
         padding: 0;
         font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
         background: #f8f8f8;
+        overflow-x: hidden;
     }
 
-    /* Header bar */
     .header {
         background: #d63384;
         color: white;
@@ -22,7 +22,6 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.12);
     }
 
-    /* Main */
     .container {
         padding: 14px;
         background: white;
@@ -30,7 +29,6 @@
         overflow-y: auto;
     }
 
-    /* Search row */
     .search-row {
         display: flex;
         gap: 8px;
@@ -65,24 +63,20 @@
         color: #666;
     }
 
-    /* Grid layout */
     .grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 12px;
     }
 
-    /* Card container */
     .card {
-        background: #fff;
+        position: relative;
         border-radius: 8px;
         overflow: hidden;
         border: 1px solid #e3e3e3;
+        background: #fff;
         cursor: pointer;
         transition: transform 0.18s ease;
-        position: relative;
-        display: flex;
-        flex-direction: column;
         box-shadow: 0 1px 2px rgba(0,0,0,0.06);
     }
 
@@ -90,7 +84,6 @@
         transform: scale(1.02);
     }
 
-    /* Hover overlay */
     .card:hover::after {
         content: "Click to use";
         position: absolute;
@@ -111,7 +104,6 @@
         object-fit: cover;
     }
 
-    /* Attribution inside card */
     .card-footer {
         padding: 6px 8px;
         font-size: 11px;
@@ -145,14 +137,15 @@
 </div>
 
 <script>
+
     const WORKER_URL = "https://unsplash-query.chriss-c6f.workers.dev";
 
-    // ENTER key triggers search
     document.getElementById("searchInput").addEventListener("keyup", function(e) {
         if (e.key === "Enter") searchImages();
     });
 
     async function searchImages() {
+
         const query = document.getElementById("searchInput").value.trim();
         const status = document.getElementById("status");
         const results = document.getElementById("results");
@@ -174,15 +167,13 @@
         status.textContent = `${data.results.length} images found`;
 
         data.results.forEach(photo => {
+
             const card = document.createElement("div");
             card.className = "card";
 
             const img = document.createElement("img");
             img.src = photo.urls.small;
 
-            card.appendChild(img);
-
-            // Footer (photographer)
             const footer = document.createElement("div");
             footer.className = "card-footer";
 
@@ -190,7 +181,6 @@
             let profile = new URL(photo.user.links.html);
             profile.searchParams.set("utm_source", "printess_stock_picker");
             profile.searchParams.set("utm_medium", "referral");
-
             link.href = profile.toString();
             link.target = "_blank";
             link.textContent = photo.user.name;
@@ -199,28 +189,29 @@
             footer.appendChild(link);
             footer.append(" on Unsplash");
 
+            card.appendChild(img);
             card.appendChild(footer);
 
-            // Click to use
-            card.addEventListener("click", () => selectImage(photo));
+            card.onclick = () => selectImage(photo);
 
             results.appendChild(card);
         });
     }
 
     function selectImage(photo) {
-        fetch(`${WORKER_URL}/download?url=${encodeURIComponent(photo.links.download_location)}`);
 
-        // Send result back to Printess editor
+        // Send result to the Printess page that opened the popup
         window.opener.postMessage({
-    type: "stock-image-selected",
-    url: photo.urls.full,
-    thumb: photo.urls.small,
-    photographer: photo.user.name
-}, "*");
+            type: "stock-image-selected",
+            url: photo.urls.full,
+            thumb: photo.urls.small,
+            photographer: photo.user.name
+        }, "*");
+
+        // Close popup
+        window.close();
     }
 </script>
 
 </body>
 </html>
-
