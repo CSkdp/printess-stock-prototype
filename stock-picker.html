@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stock Images</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+        background: #f8f8f8;
+    }
+
+    /* Header bar */
+    .header {
+        background: #d63384;
+        color: white;
+        padding: 12px 18px;
+        font-size: 17px;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+    }
+
+    /* Main */
+    .container {
+        padding: 14px;
+        background: white;
+        height: calc(100vh - 54px);
+        overflow-y: auto;
+    }
+
+    /* Search row */
+    .search-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    .search-row input {
+        flex: 1;
+        padding: 9px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    .search-row button {
+        background: #d63384;
+        border: none;
+        padding: 9px 16px;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .search-row button:hover {
+        background: #b3286e;
+    }
+
+    .status {
+        margin-bottom: 12px;
+        font-size: 13px;
+        color: #666;
+    }
+
+    /* Grid layout */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    /* Card container */
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e3e3e3;
+        cursor: pointer;
+        transition: transform 0.18s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .card:hover {
+        transform: scale(1.02);
+    }
+
+    /* Hover overlay */
+    .card:hover::after {
+        content: "Click to use";
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        color: white;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        pointer-events: none;
+    }
+
+    .card img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    /* Attribution inside card */
+    .card-footer {
+        padding: 6px 8px;
+        font-size: 11px;
+        text-align: center;
+        background: #fafafa;
+        color: #444;
+    }
+
+    .card-footer a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="header">Stock Images</div>
+
+<div class="container">
+
+    <div class="search-row">
+        <input id="searchInput" type="text" placeholder="Search images (e.g. paper texture)">
+        <button onclick="searchImages()">Search</button>
+    </div>
+
+    <div class="status" id="status"></div>
+    <div class="grid" id="results"></div>
+
+</div>
+
+<script>
+    const WORKER_URL = "https://unsplash-query.chriss-c6f.workers.dev";
+
+    // ENTER key triggers search
+    document.getElementById("searchInput").addEventListener("keyup", function(e) {
+        if (e.key === "Enter") searchImages();
+    });
+
+    async function searchImages() {
+        const query = document.getElementById("searchInput").value.trim();
+        const status = document.getElementById("status");
+        const results = document.getElementById("results");
+
+        if (!query) return;
+
+        status.textContent = "Searching...";
+        results.innerHTML = "";
+
+        const url = `${WORKER_URL}/search?query=${encodeURIComponent(query)}&per_page=30`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.results || data.results.length === 0) {
+            status.textContent = "No results found.";
+            return;
+        }
+
+        status.textContent = `${data.results.length} images found`;
+
+        data.results.forEach(photo => {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const img = document.createElement("img");
+            img.src = photo.urls.small;
+
+            card.appendChild(img);
+
+            // Footer (photographer)
+            const footer = document.createElement("div");
+            footer.className = "card-footer";
+
+            const link = document.createElement("a");
+            let profile = new URL(photo.user.links.html);
+            profile.searchParams.set("utm_source", "printess_stock_picker");
+            profile.searchParams.set("utm_medium", "referral");
+
+            link.href = profile.toString();
+            link.target = "_blank";
+            link.textContent = photo.user.name;
+
+            footer.append("Photo by ");
+            footer.appendChild(link);
+            footer.append(" on Unsplash");
+
+            card.appendChild(footer);
+
+            // Click to use
+            card.addEventListener("click", () => selectImage(photo));
+
+            results.appendChild(card);
+        });
+    }
+
+    function selectImage(photo) {
+        fetch(`${WORKER_URL}/download?url=${encodeURIComponent(photo.links.download_location)}`);
+
+        // Send result back to Printess editor
+        window.parent.postMessage({
+            type: "stock-image-selected",
+            url: photo.urls.full,
+            thumb: photo.urls.small,
+            photographer: photo.user.name
+        }, "*");
+    }
+</script>
+
+</body>
+</html>
