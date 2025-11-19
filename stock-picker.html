@@ -212,14 +212,15 @@
         fetch(`${WORKER_URL}/download?url=${encodeURIComponent(photo.links.download_location)}`);
 
         // Send result back to Printess editor
-        window.parent.postMessage({
-            type: "stock-image-selected",
-            url: photo.urls.full,
-            thumb: photo.urls.small,
-            photographer: photo.user.name
-        }, "*");
+        window.opener.postMessage({
+    type: "stock-image-selected",
+    url: photo.urls.full,
+    thumb: photo.urls.small,
+    photographer: photo.user.name
+}, "*");
     }
 </script>
 
 </body>
 </html>
+
