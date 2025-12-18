@@ -1,115 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Printess + Stock Image Picker Prototype</title>
+<meta charset="UTF-8">
+<title>Stock Images</title>
 
 <style>
-    html, body {
+    body {
         margin: 0;
         padding: 0;
-        height: 100%;
-        width: 100%;
+        font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+        background: #f8f8f8;
+        overflow-x: hidden;
+    }
+
+    .header {
+        background: #d63384;
+        color: white;
+        padding: 12px 18px;
+        font-size: 17px;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+    }
+
+    .container {
+        padding: 14px;
+        background: white;
+        height: calc(100vh - 54px);
+        overflow-y: auto;
+    }
+
+    .search-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    .search-row input {
+        flex: 1;
+        padding: 9px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    .search-row button {
+        background: #d63384;
+        border: none;
+        padding: 9px 16px;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .search-row button:hover {
+        background: #b3286e;
+    }
+
+    .status {
+        margin-bottom: 12px;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .card {
+        position: relative;
+        border-radius: 8px;
         overflow: hidden;
-        font-family: sans-serif;
+        border: 1px solid #e3e3e3;
+        background: #fff;
+        cursor: pointer;
+        transition: transform 0.18s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
     }
 
-    #printess-editor {
-        width: 100vw;
-        height: 100vh;
+    .card:hover {
+        transform: scale(1.02);
     }
+
+    .card:hover::after {
+        content: "Click to use";
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        color: white;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        pointer-events: none;
+    }
+
+    .card img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    .card-footer {
+        padding: 6px 8px;
+        font-size: 11px;
+        text-align: center;
+        background: #fafafa;
+        color: #444;
+    }
+
+    .card-footer a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
 </style>
-
 </head>
+
 <body>
 
-<!-- Printess embeds into this container -->
-<div id="printess-editor"></div>
+<div class="header">Stock Images</div>
 
-<script type="module">
-/* -------------------------------------------
-   LOAD PRINTESS EDITOR
----------------------------------------------- */
-const printessLoader = await import("https://editor.printess.com/printess-editor/loader.js");
+<div class="container">
 
-const printess = await printessLoader.load({
+    <div class="search-row">
+        <input id="searchInput" type="text" placeholder="Search images (e.g. paper texture)">
+        <button onclick="searchImages()">Search</button>
+    </div>
 
-    /* 
-    🔥 REPLACE THIS TOKEN with your real Printess token 
-    --------------------------------------------------- */
-    token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InByaW50ZXNzLXNhYXMtYWxwaGEiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiI5ZmMwZWIxYTc0NTg0NWRmYmZmOTI0NjE2MWI0Y2U0MSIsImp0aSI6Im1GQXZVN3NoNGhvZ0Nvb0ZkSDhkbGl6UkQtRWNrek01Iiwicm9sZSI6InNob3AiLCJuYmYiOjE3NjA3MDY3MDEsImV4cCI6MjA3NjA2NjcwMSwiaWF0IjoxNzYwNzA2NzAxLCJpc3MiOiJQcmludGVzcyBHbWJIICYgQ28uS0ciLCJhdWQiOiJwcmludGVzcy1zYWFzIn0.GJmwBCQHr8Srp1BMGKgEOsML1irL6d7C0YF_lA5d67v1W09rsxB9npft8lmQ7ppV_B6PzNpGV4Xph1ixH_rPotUOlmE8GpNPdM-teuYDQbegPH7ejAjp0GhpijuwWy9iAUKyAZZg3E-v52LcbsYAq_rwrDs9vlB4H9Se6n6bEnLxek662IN8Hg9wWQKRXFMq-Lu_pdMTtAf4pE6Z4AmniEIKvbxG7Jjq86CacdImk17GJm2UUSx3Aoo8xl-UhFWozUsNKgNA-_yJQ2QltqW4lFA4CplJjSV-ldRZv4gPm9Gx7Rd6SxbZEKoAGjjb5K-L1k6bOTwQF6X_KhqStQhakYLuM8MS4jKLAfFQKEAnUm28sIxJohJm0KqoGgvrchw2eK4JTadIJQp-PEBD5ux3lfBrIDBW8zWsaxg0oJkjhgXjWufT2JSHDUXEFVZMl9cherYYmHfvYpgad3pdaUlGMEcLVtL75znxDzYCNAZGkggHksmw7uy7yzdb3xV2rvWnBnkJq48yD6NipYVW5VyC_AZOPYLg2ybZh-ee3lBevMqIu6HIP1IbfnffeAayKaWRSNd-5283hMmg4UL5N-KgVRe_p5kwS0Jnbu87PUaDAwwuSMsB5yyJ6rZfxJ1l-BHh0D-KOXQYjy9thPgqNUisOctUc0sZydORAZfXDI4aGsY",
+    <div class="status" id="status"></div>
+    <div class="grid" id="results"></div>
 
+</div>
 
-    /* 
-    🔥 REPLACE TEMPLATE NAME + VERSION IF DIFFERENT 
-    --------------------------------------------------- */
-    templateName: "Blank Circle",
-    templateVersion: "draft",
+<script>
 
+    const WORKER_URL = "https://unsplash-query.chriss-c6f.workers.dev";
 
-    host: document.getElementById("printess-editor"),
+    document.getElementById("searchInput").addEventListener("keyup", function(e) {
+        if (e.key === "Enter") searchImages();
+    });
 
-    basketId: "demo-basket-123",
+    async function searchImages() {
 
+        const query = document.getElementById("searchInput").value.trim();
+        const status = document.getElementById("status");
+        const results = document.getElementById("results");
 
-    buttons: [
-        {
-            label: "Stock Images",
-            location: "image-upload",
+        if (!query) return;
 
-            clickCallback: () => {
+        status.textContent = "Searching...";
+        results.innerHTML = "";
 
-                printess.ui.openIframeDialog({
-                    title: "Stock Images",
-                    url: "https://github.com/CSkdp/printess-stock-prototype/blob/main/stock-picker.html",
-                    width: 700,
-                    height: 600,
-                    allow: "fullscreen"
-                });
+        const url = `${WORKER_URL}/search?query=${encodeURIComponent(query)}&per_page=30`;
+        const res = await fetch(url);
+        const data = await res.json();
 
-                // Listen for message from stock picker
-                window.addEventListener("message", async (event) => {
-                    if (!event.data || event.data.type !== "stock-image-selected") return;
-
-                    const imageUrl = event.data.url;
-
-                    printess.ui.showProgressOverlay("Importing Image...");
-
-                    await printess.api.importImageFromUrl(imageUrl, true);
-
-                    printess.api.clearSelection();
-                    printess.ui.hideProgressOverlay();
-                    printess.ui.closeDialog();
-
-                }, { once: true });
-            },
-
-            icon: "",
-            color: "primary",
-            outline: "outline"
-        },
-
-        /* -------------------------------------------
-           🔥 NEW ROTATE CANVAS BUTTON
-        ---------------------------------------------- */
-        {
-            label: "Rotate Canvas",
-            location: "button-bar",
-            icon: "rotateCw",
-            color: "secondary",
-            outline: "outline",
-
-            clickCallback: async () => {
-                // Store rotation on window so it persists across clicks
-                if (!window.__canvasRotation) window.__canvasRotation = 0;
-
-                window.__canvasRotation = (window.__canvasRotation + 90) % 360;
-
-                await printess.api.setDocumentRotation(window.__canvasRotation);
-            }
+        if (!data.results || data.results.length === 0) {
+            status.textContent = "No results found.";
+            return;
         }
-    ]
-});
+
+        status.textContent = `${data.results.length} images found`;
+
+        data.results.forEach(photo => {
+
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const img = document.createElement("img");
+            img.src = photo.urls.small;
+
+            const footer = document.createElement("div");
+            footer.className = "card-footer";
+
+            const link = document.createElement("a");
+            let profile = new URL(photo.user.links.html);
+            profile.searchParams.set("utm_source", "printess_stock_picker");
+            profile.searchParams.set("utm_medium", "referral");
+            link.href = profile.toString();
+            link.target = "_blank";
+            link.textContent = photo.user.name;
+
+            footer.append("Photo by ");
+            footer.appendChild(link);
+            footer.append(" on Unsplash");
+
+            card.appendChild(img);
+            card.appendChild(footer);
+
+            card.onclick = () => selectImage(photo);
+
+            results.appendChild(card);
+        });
+    }
+
+    function selectImage(photo) {
+
+        // Send result to the Printess page that opened the popup
+        window.opener.postMessage({
+            type: "stock-image-selected",
+            url: photo.urls.full,
+            thumb: photo.urls.small,
+            photographer: photo.user.name
+        }, "*");
+
+        // Close popup
+        window.close();
+    }
 </script>
 
 </body>
